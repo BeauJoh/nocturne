@@ -673,7 +673,7 @@ pascal OSStatus AppEventHandler( EventHandlerCallRef inCallRef, EventRef inEvent
   [dController addObserver:self forKeyPath:@"values.dimMenuOpacity" options:0 context:NULL];
   [dController addObserver:self forKeyPath:@"values.hueCorrect" options:0 context:NULL];
   [dController addObserver:self forKeyPath:@"values.showMenu" options:0 context:NULL];
-  
+
   NSRect rect = [[NSScreen mainScreen] frame];
   rect = NSMakeRect(0,NSMaxY(rect)-22,NSWidth(rect),22);
   
@@ -719,6 +719,17 @@ pascal OSStatus AppEventHandler( EventHandlerCallRef inCallRef, EventRef inEvent
 
 - (void)beginTracking {
   trackingMenu = TRUE;  
+}
+
+#pragma mark fullscreenmode functions
+- (void)windowDidEnterFullScreen {
+  [self show];
+  shouldHide = NO;
+}
+
+- (void)windowDidExitFullScreen {
+  shouldHide = YES;
+  [self hide];
 }
 
 - (void)updateFrames {
@@ -776,6 +787,11 @@ pascal OSStatus AppEventHandler( EventHandlerCallRef inCallRef, EventRef inEvent
 
   [[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(endTracking) name:@"com.apple.HIToolbox.endMenuTrackingNotification" object:nil];
   [[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(beginTracking) name:@"com.apple.HIToolbox.beginMenuTrackingNotification" object:nil];
+
+#pragma mark fullscreenmode listener
+  [[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidEnterFullScreen) name:@"com.apple.HIToolbox.hideMenuBarShown" object:nil];
+  [[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidExitFullScreen) name:@"com.apple.HIToolbox.frontMenuBarShown" object:nil];
+  
   
   windows = [[NSArray arrayWithObjects:menuWindow, menuHueOverlay, menuInvertOverlay, nil] retain]; 
   [self updateFrames];
